@@ -1,0 +1,101 @@
+patterns:
+  production:
+    - 4.0.55555
+  check:
+    - 4.0.0
+    - 4.6.0
+rules:
+  #  1. Возможность написать разные правила очистки для релизных и проверочных сборок
+  delete_by_version :
+    active: true
+    title:
+       'Remove assembly'
+    size: false
+    date: false
+    name: >
+      production/install|\
+      production/tests|\
+      production/debug|\
+      check/install
+    configurations:
+      production:
+        install: false
+        tests: false
+        debug: true
+        report: false
+      test:
+        install: false
+        tests: true
+        debug: true
+        report: false
+    exec:
+      DELETE
+  #  2. Возможность удалять только файлы, соответствующие определённой маске (регулярному выражению, например)
+  delete_by_pattern:
+    active: true
+    title: 'Remove unneeded files'
+    size: false
+    date: false
+    name: >
+      5.123$
+    exec:
+      DELETE
+  #  3. Возможность удалять файлы/директории старше N дней
+  delete_by_count:
+    active: false
+    title: 'Remove unneeded files'
+    size: false
+    date:
+      command:
+        ">"
+      time_string:
+        09/19/18 13:55:26
+      format:
+        '%m/%d/%y %H:%M:%S'
+    name: false
+    exec:
+      DELETE
+  #  4. Возможность удаления всей папки сборки
+  delete_by_name:
+    active: true
+    title: 'Remove assembly by name'
+    size: false
+    date: false
+    name: >
+      ^./tests/5.1231$
+    exec:
+      DELETE
+#  Возможность использовать несколько правил для составление более сложных, например, если директория старше 3 дней, то удалить все *.tar.gz из папки tests, если директория старше 5 дней - удалить всю директорию
+  delete_by_rule:
+    active: true
+    title: 'Remove assembly by rules'
+    size: false
+    date: false
+    name: false
+    exec: >
+      rules
+    rules:
+      - more_3_days:
+        size: false
+        date:
+          command:
+            ">"
+          time_string:
+            09/19/18 13:55:26
+          format:
+            '%m/%d/%y %H:%M:%S'
+        name: false
+        exec:
+          DELETE tests/*.tar.gz
+      - more_5_days:
+        size: false
+        date:
+          command:
+            ">"
+          time_string:
+            09/17/18 13:55:26
+          format:
+            '%m/%d/%y %H:%M:%S'
+        name: false
+        exec:
+          DELETE .
